@@ -1,0 +1,4 @@
+(executable
+ (public_name etl_project)
+ (name main)
+ (libraries etl_project csv))
