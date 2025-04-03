@@ -68,7 +68,6 @@ let parser_tax s =
   try Ok (float_of_string s) with
   | Failure _ -> Error (Printf.sprintf "Invalid tax: %s" s)
 
-(* Parse a single CSV row into an order *)
 let parse_order_row row =
   match row with
   | [id_str; client_id_str; date_str; status_str; origin_str] ->
@@ -90,66 +89,3 @@ let parse_orderItem_row row =
       let* tax = parser_tax tax_str in
       Ok { order_id; product_id; quantity; price; tax }
   | _ -> Error "Row doesn't have the expected number of columns"
-
-(* Partition a list into two lists based on a predicate *)
-
-(* Process the entire CSV file *)
-let process_order_csv file =
-  try
-    let rows = Csv.load file in
-    match rows with
-    | _header :: data_rows ->
-        (* Skip header row and parse data *)
-        let results = List.map parse_order_row data_rows in
-        let orders, errors = 
-          List.partition_map (function 
-            | Ok order -> Left order 
-            | Error msg -> Right msg) results
-        in
-        (* Report parsing results *)
-        Printf.printf "Successfully parsed %d orders\n" (List.length orders);
-        if List.length errors > 0 then begin
-          Printf.printf "Found %d errors:\n" (List.length errors);
-          List.iter (Printf.printf "  - %s\n") errors
-        end;
-        orders
-    | [] -> 
-        Printf.printf "Empty CSV file\n";
-        []
-  with
-  | Csv.Failure (row, col, msg) -> 
-      Printf.printf "CSV parsing error at row %d, column %d: %s\n" row col msg;
-      []
-  | Sys_error msg ->
-      Printf.printf "File error: %s\n" msg;
-      []
-
-let process_orderItem_csv file =
-  try
-    let rows = Csv.load file in
-    match rows with
-    | _header :: data_rows ->
-        (* Skip header row and parse data *)
-        let results = List.map parse_orderItem_row data_rows in
-        let orderItems, errors = 
-          List.partition_map (function 
-            | Ok orderItem -> Left orderItem 
-            | Error msg -> Right msg) results
-        in
-        (* Report parsing results *)
-        Printf.printf "Successfully parsed %d orderItems\n" (List.length orderItems);
-        if List.length errors > 0 then begin
-          Printf.printf "Found %d errors:\n" (List.length errors);
-          List.iter (Printf.printf "  - %s\n") errors
-        end;
-        orderItems
-    | [] -> 
-        Printf.printf "Empty CSV file\n";
-        []
-  with
-  | Csv.Failure (row, col, msg) -> 
-      Printf.printf "CSV parsing error at row %d, column %d: %s\n" row col msg;
-      []
-  | Sys_error msg ->
-      Printf.printf "File error: %s\n" msg;
-      []
