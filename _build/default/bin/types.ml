@@ -1,5 +1,5 @@
 (* types.ml *)
-(* This module contains the types used in the application *)
+(* This module contains the types used in the project *)
 
 type id = int
 
@@ -34,7 +34,7 @@ type quantity = int
 
 type price = float
 
-type tax = float (* percentage *)
+type tax = float
 
 type orderItem = {
   order_id: order_id;

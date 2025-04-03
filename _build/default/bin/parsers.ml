@@ -1,5 +1,12 @@
 (* parsers.ml *)
-(* This m*)
+(* This module provides parsing functionality for the ETL project.
+  It contains functions to parse and validate different data formats,
+  convert between representations, and prepare data for the transformation
+  stage of the ETL pipeline.
+  
+  The parsers implemented here handle various input formats and produce
+  structured data suitable for further processing in the ETL workflow.
+*)
 
 let ( let* ) = Result.bind
 
