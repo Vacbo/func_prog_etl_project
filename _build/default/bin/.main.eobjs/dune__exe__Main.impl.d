@@ -1,1 +1,1 @@
-bin/main.ml: Arg IoHelper Pure
+bin/main.ml: Arg IoHelper Printf Pure Sys

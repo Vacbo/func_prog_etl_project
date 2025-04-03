@@ -75,6 +75,34 @@ let process_orderItem_csv file =
   | Sys_error msg ->
       Printf.printf "File error: %s\n" msg;
       []
+
+(** 
+  Downloads a file from a URL and saves it to a temporary file.
+  Requires the cohttp, cohttp-lwt-unix, and lwt packages.
+
+  @param url The URL to download from
+  @return Result containing either the temporary file path or an error message
+*)
+let download_file url =
+  try
+    (* Create a temporary file *)
+    let temp_file = Filename.temp_file "etl_download_" ".csv" in
+    
+    (* Set up the command using curl (available on most systems) *)
+    let cmd = Printf.sprintf "curl -s -o %s %s" (Filename.quote temp_file) (Filename.quote url) in
+    
+    (* Execute the command *)
+    let status = Sys.command cmd in
+    
+    if status = 0 then
+      (* Success - return the temp file path *)
+      Ok temp_file
+    else
+      (* Curl failed *)
+      Error (Printf.sprintf "Failed to download from %s (exit code: %d)" url status)
+  with e ->
+    (* Handle any exceptions *)
+    Error (Printf.sprintf "Exception while downloading: %s" (Printexc.to_string e))
  
 (** 
   Writes aggregated data to a SQLite database file.
