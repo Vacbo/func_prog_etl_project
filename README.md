@@ -44,12 +44,12 @@ opam install csv sqlite3 unix ounit2
 
 ## Como Executar
 
-** Compilação **
+**Compilação**
 
 ```bash
 dune build
 ```
-** Execução **
+**Execução**
 
 ```bash
 # Execução básica (dados locais)
@@ -68,7 +68,7 @@ dune exec etl_project -- --monthly
 dune exec etl_project -- --order-url https://example.com/order.csv --order-item-url https://example.com/order_item.csv
 ```
 
-** Executando Testes **
+**Executando Testes**
 
 ```bash
 dune test
@@ -92,8 +92,6 @@ dune test
     * Saída em formato CSV
     * Saída em formato SQLite
     * Geração de relatório mensal opcional
-
-## Responsabilidades de cada Módulo
 
 ## Responsabilidades de cada Módulo
 
