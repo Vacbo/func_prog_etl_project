@@ -1,9 +1,3 @@
-(library
- (name etl_bin)
- (wrapped false)
- (modules types pure parsers ioHelper)
- (libraries csv sqlite3 unix))
-
 (executable
  (name main)
  (public_name etl_project)
