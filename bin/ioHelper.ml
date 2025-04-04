@@ -166,3 +166,62 @@ let write_output filename use_sqlite aggregated =
   else
     write_to_csv full_filename aggregated;
   full_filename
+
+(** 
+  Writes monthly average data to a CSV file.
+  @param filename The path to the output CSV file
+  @param monthly_data The list of monthly averages as ((year, month), avg_amount, avg_tax) tuples
+*)
+ let write_monthly_averages_to_csv filename monthly_data =
+  let csv_rows =
+    ("year" :: "month" :: "avg_amount" :: "avg_tax" :: []) ::
+    List.map (fun ((year, month), avg_amount, avg_tax) ->
+      [string_of_int year; 
+       string_of_int month; 
+       Printf.sprintf "%.2f" avg_amount; 
+       Printf.sprintf "%.2f" avg_tax]
+    ) monthly_data
+  in
+  Csv.save filename csv_rows;
+  Printf.printf "Monthly averages written to %s\n" filename
+
+(** 
+  Writes monthly average data to a SQLite database file.
+  @param filename The path to the output database file
+  @param monthly_data The list of monthly averages as ((year, month), avg_amount, avg_tax) tuples
+*)
+let write_monthly_averages_to_sqlite filename monthly_data =
+  let db = Sqlite3.db_open filename in
+  
+  (* Create table *)
+  let create_table_sql = 
+    "CREATE TABLE IF NOT EXISTS monthly_averages (year INTEGER, month INTEGER, avg_amount REAL, avg_tax REAL);" in
+  (match Sqlite3.exec db create_table_sql with
+   | Sqlite3.Rc.OK -> ()
+   | rc -> Printf.printf "Error creating monthly averages table: %s\n" (Sqlite3.Rc.to_string rc));
+  
+  (* Insert data *)
+  List.iter (fun ((year, month), avg_amount, avg_tax) ->
+    let insert_sql = Printf.sprintf 
+      "INSERT INTO monthly_averages VALUES (%d, %d, %.2f, %.2f);" 
+      year month avg_amount avg_tax in
+    (match Sqlite3.exec db insert_sql with
+     | Sqlite3.Rc.OK -> ()
+     | rc -> Printf.printf "Error inserting monthly average row: %s\n" (Sqlite3.Rc.to_string rc))
+  ) monthly_data;
+  
+  Sqlite3.db_close db |> ignore;
+  Printf.printf "Monthly averages written to SQLite database at %s\n" filename
+
+(** 
+  Writes monthly average data to either SQLite or CSV based on the settings.
+  @param base_filename The base output filename (without extension)
+  @param use_sqlite Whether to use SQLite format (true) or CSV format (false)
+  @param monthly_data The monthly average data to write
+*)
+let write_monthly_averages base_filename use_sqlite monthly_data =
+  let filename = base_filename ^ "_monthly" in
+  if use_sqlite then
+    write_monthly_averages_to_sqlite (filename ^ ".db") monthly_data
+  else
+    write_monthly_averages_to_csv (filename ^ ".csv") monthly_data

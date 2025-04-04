@@ -3,11 +3,13 @@ open IoHelper
 
 let status_filter = ref None
 let origin_filter = ref None
-let output_as_sqlite = ref false
 let order_url = ref None
 let order_item_url = ref None
+let output_as_sqlite = ref false
+let output_monthly_avg = ref false
 
 let set_output_sqlite () = output_as_sqlite := true
+let set_output_monthly_avg () = output_monthly_avg := true
 let set_status s = status_filter := Some s
 let set_origin o = origin_filter := Some o
 let set_order_url url = order_url := Some url
@@ -18,6 +20,7 @@ let () =
     ("--status", Arg.String set_status, "Filter orders by status (Pending, Complete, Cancelled)");
     ("--origin", Arg.String set_origin, "Filter orders by origin (P, O)");
     ("--sqlite", Arg.Unit set_output_sqlite, "Save output as a SQLite database");
+    ("--monthly", Arg.Unit set_output_monthly_avg, "Generate monthly average revenue and tax report");
     ("--order-url", Arg.String set_order_url, "URL to download order CSV data from");
     ("--order-item-url", Arg.String set_order_item_url, "URL to download order item CSV data from")
   ] in
@@ -64,7 +67,13 @@ let () =
       
     (* Write output *)
     let _ = write_output "data/output" !output_as_sqlite aggregated in
-    ()
+    
+    (* Generate monthly averages if requested *)
+    if !output_monthly_avg then begin
+      let monthly_data = aggregate_by_month_year orders filtered_orderItems in
+      write_monthly_averages "data/output" !output_as_sqlite monthly_data;
+      Printf.printf "Monthly average report generated\n"
+    end;
       
   | Error err1, Error err2 ->
     Printf.printf "Error with both input sources:\n";

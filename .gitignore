@@ -1,0 +1,27 @@
+# Dune build directory
+_build/
+
+# merlin configuring file
+.merlin
+
+# Dune generated files
+*.install
+
+# Local OPAM switch
+_opam/
+
+# Binary executables
+*.exe
+!dune-project
+
+# Editor backup files
+*~
+\#*\#
+.\#*
+*.swp
+
+# Generated documentation
+/doc/
+
+# System files
+.DS_Store

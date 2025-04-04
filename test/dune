@@ -1,2 +1,4 @@
 (test
- (name test_etl_project))
+ (name test_pure)
+ (libraries ounit2 etl_bin)
+ (modules test_pure))
